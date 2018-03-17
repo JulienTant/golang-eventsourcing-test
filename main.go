@@ -32,6 +32,8 @@ func main() {
 	log.Info(fmt.Sprintf("%d events generated", len(history)))
 
 	log.Info("Applying events...")
+	start := time.Now()
 	t := NewTrainFromHistory(history)
-	log.Info(fmt.Sprintf("%s", t))
+	log.Info("Events applied in " + time.Now().Sub(start).String())
+	fmt.Print(t.String())
 }

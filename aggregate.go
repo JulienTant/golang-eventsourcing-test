@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"time"
+
+	"github.com/satori/go.uuid"
 )
 
 func NewTrainFromHistory(events []interface{}) *Train {
@@ -11,6 +13,12 @@ func NewTrainFromHistory(events []interface{}) *Train {
 		train.apply(events[i])
 	}
 	return train
+}
+
+func AnnounceNewTrain(From string, FromTime time.Time, To string, ToTime time.Time) *Train {
+	t := &Train{}
+	t.Announce(uuid.NewV4().String(), From, FromTime, To, ToTime)
+	return t
 }
 
 // Aggregate
@@ -23,6 +31,37 @@ type Train struct {
 	ToTime    time.Time
 	ToDelay   time.Duration
 	Position  Position
+
+	changes []interface{}
+	version int
+}
+
+func (t *Train) Announce(ID, From string, FromTime time.Time, To string, ToTime time.Time) {
+	t.recordThat(TrainWasAnnounced{
+		ID:       ID,
+		From:     From,
+		FromTime: FromTime,
+		To:       To,
+		ToTime:   ToTime,
+	})
+}
+
+func (t *Train) Leaves(tm time.Time) {
+	t.recordThat(TrainHasLeft{When: tm})
+}
+
+func (t *Train) Arrives(tm time.Time) {
+	t.recordThat(TrainHasArrived{When: tm})
+}
+
+func (t *Train) Move(tm time.Time, p Position) {
+	t.recordThat(TrainHasMoved{Where: p, When: tm})
+}
+
+func (t *Train) recordThat(event interface{}) {
+	t.changes = append(t.changes, event)
+	t.version++
+	t.apply(event)
 }
 
 func (t *Train) apply(event interface{}) {
