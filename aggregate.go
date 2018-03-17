@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"time"
+
+	"github.com/satori/go.uuid"
 )
 
 func NewTrainFromHistory(events []interface{}) *Train {
@@ -13,9 +15,9 @@ func NewTrainFromHistory(events []interface{}) *Train {
 	return train
 }
 
-func AnnounceNewTrain(ID, From string, FromTime time.Time, To string, ToTime time.Time) *Train {
+func AnnounceNewTrain(From string, FromTime time.Time, To string, ToTime time.Time) *Train {
 	t := &Train{}
-	t.Announce(ID, From, FromTime, To, ToTime)
+	t.Announce(uuid.NewV4().String(), From, FromTime, To, ToTime)
 	return t
 }
 
